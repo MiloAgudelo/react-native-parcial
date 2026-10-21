@@ -1,0 +1,242 @@
+==========================================================================
+ COMANDOS UTILES - REACT NATIVE / EXPO (SDK 57)
+==========================================================================
+Los proyectos usan pnpm (movies usa npm, tiene package-lock.json).
+Si el PC no tiene pnpm, todo funciona igual cambiando "pnpm" por "npm"
+y "pnpm dlx" por "npx". Lo marcado (PS) es para PowerShell y (bash) para
+Git Bash.
+
+
+--------------------------------------------------------------------------
+ 1. PREPARAR EL PC
+--------------------------------------------------------------------------
+node -v                      ver version de Node (se necesita 20 o mas)
+npm -v
+corepack enable              activa pnpm sin instalarlo aparte
+npm install -g pnpm          si corepack falla
+pnpm -v
+git --version
+
+En el celular: instalar "Expo Go" (Play Store / App Store).
+El celular y el PC deben estar en la MISMA red wifi.
+
+
+--------------------------------------------------------------------------
+ 2. DESCARGAR LOS PROYECTOS
+--------------------------------------------------------------------------
+git clone https://github.com/MiloAgudelo/react-native-parcial
+cd react-native-parcial
+cd carrito-app               entrar a un proyecto
+cd ..                        volver a la carpeta anterior
+
+Sin git: GitHub -> Code -> Download ZIP -> descomprimir.
+
+
+--------------------------------------------------------------------------
+ 3. INSTALAR Y CORRER
+--------------------------------------------------------------------------
+pnpm install                 instala dependencias (crea node_modules)
+npm install                  lo mismo con npm
+
+pnpm start                   = npx expo start
+npx expo start               arranca Metro y muestra el QR
+npx expo start -c            arranca LIMPIANDO cache (usar cuando algo raro pasa)
+npx expo start --tunnel      si el celular no conecta por wifi (red de la U)
+npx expo start --web         abrir en el navegador
+npx expo start --android     abrir en emulador Android
+npx expo start --go          forzar modo Expo Go
+npx expo start --port 8082   usar otro puerto si el 8081 esta ocupado
+
+Teclas dentro de "expo start":
+  a   abrir en Android        w   abrir en web
+  r   recargar la app         m   menu de desarrollo
+  j   abrir debugger          c   limpiar la consola
+  s   cambiar Expo Go / dev build
+  Ctrl + C   detener el servidor
+
+
+--------------------------------------------------------------------------
+ 4. INSTALAR LIBRERIAS
+--------------------------------------------------------------------------
+Para librerias de Expo / nativas usar SIEMPRE "npx expo install"
+(elige la version compatible con el SDK):
+
+npx expo install expo-router expo-linking expo-constants
+npx expo install react-native-safe-area-context react-native-screens
+npx expo install expo-location react-native-maps
+npx expo install expo-image expo-status-bar
+npx expo install @react-native-async-storage/async-storage
+npx expo install react-native-reanimated react-native-gesture-handler
+
+Librerias de JS puro (da igual la version):
+pnpm add zustand
+pnpm add axios
+pnpm add @tanstack/react-query
+pnpm add -D typescript @types/react      (-D = dependencia de desarrollo)
+
+NativeWind (Tailwind):
+npx expo install nativewind tailwindcss react-native-reanimated react-native-safe-area-context
+npx tailwindcss init
+
+Con npm: "npm install paquete"  /  "npm install -D paquete"
+
+
+--------------------------------------------------------------------------
+ 5. QUITAR COSAS
+--------------------------------------------------------------------------
+pnpm remove zustand          desinstalar una libreria
+npm uninstall zustand        lo mismo con npm
+
+Borrar node_modules y reinstalar (arregla la mayoria de errores raros):
+  (PS)   Remove-Item -Recurse -Force node_modules, .expo
+         pnpm install
+  (bash) rm -rf node_modules .expo && pnpm install
+  (cmd)  rmdir /s /q node_modules
+
+Borrar tambien el lockfile (ultimo recurso):
+  (PS)   Remove-Item -Force pnpm-lock.yaml, package-lock.json
+  (bash) rm -f pnpm-lock.yaml package-lock.json
+
+Borrar una carpeta o archivo:
+  (PS)   Remove-Item -Recurse -Force src\components\viejo
+  (bash) rm -rf src/components/viejo
+
+Dejar el proyecto de plantilla en blanco (proyectos creados con create-expo-app):
+pnpm run reset-project
+
+
+--------------------------------------------------------------------------
+ 6. CREAR UN PROYECTO NUEVO
+--------------------------------------------------------------------------
+npx create-expo-app@latest mi-app                                  plantilla con expo-router y tabs
+npx create-expo-app@latest mi-app --template blank-typescript      en blanco con TS
+npx create-expo-app@latest mi-app --template tabs
+cd mi-app
+npx expo start
+
+Con pnpm: pnpm create expo-app mi-app
+
+
+--------------------------------------------------------------------------
+ 7. ARREGLAR ERRORES
+--------------------------------------------------------------------------
+npx expo-doctor              revisa problemas del proyecto
+npx expo install --check     dice que librerias tienen version incompatible
+npx expo install --fix       las corrige
+npx expo start -c            limpiar cache de Metro
+npx tsc --noEmit             revisar errores de TypeScript sin compilar
+pnpm lint                    = npx expo lint (si el proyecto lo tiene)
+
+"Port 8081 is being used":
+  (PS)   Get-Process -Id (Get-NetTCPConnection -LocalPort 8081).OwningProcess | Stop-Process
+  (cmd)  netstat -ano | findstr :8081     luego   taskkill /PID <numero> /F
+  o simplemente: npx expo start --port 8082
+
+"pnpm no se reconoce": corepack enable  o  npm install -g pnpm
+"No se puede ejecutar scripts en este sistema" (PowerShell):
+  Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+"ERR_PNPM_UNSUPPORTED_ENGINE" o error de engine-strict:
+  borrar el archivo .npmrc del proyecto, o usar npm
+El celular no carga el QR: misma wifi, o usar --tunnel
+Cambios de NativeWind / tailwind.config no se ven: npx expo start -c
+"Unable to resolve module" despues de instalar algo: Ctrl+C y npx expo start -c
+
+
+--------------------------------------------------------------------------
+ 8. VARIABLES DE ENTORNO (.env)
+--------------------------------------------------------------------------
+Crear un archivo ".env" en la raiz del proyecto:
+  EXPO_PUBLIC_MOVIE_DB_KEY=tu_clave
+  EXPO_PUBLIC_SUPABASE_URL=...
+  EXPO_PUBLIC_SUPABASE_ANON_KEY=...
+Solo se leen en la app las que empiezan por EXPO_PUBLIC_:
+  process.env.EXPO_PUBLIC_MOVIE_DB_KEY
+Despues de cambiar el .env reiniciar: npx expo start -c
+Copiar la plantilla:  (PS) Copy-Item .env.example .env    (bash) cp .env.example .env
+
+
+--------------------------------------------------------------------------
+ 9. GIT
+--------------------------------------------------------------------------
+git status                   ver que cambio
+git add .                    preparar todos los cambios
+git commit -m "mensaje"
+git push
+git pull                     traer cambios
+git log --oneline            historial corto
+git diff                     ver cambios sin commitear
+git restore archivo.tsx      deshacer cambios de un archivo
+git restore .                deshacer TODOS los cambios sin commitear (cuidado)
+git clean -fd                borrar archivos nuevos sin trackear (cuidado)
+git switch -c nueva-rama     crear rama y pasarse a ella
+git switch main
+
+Subir un proyecto nuevo a GitHub:
+git init
+git add .
+git commit -m "Primer commit"
+git branch -M main
+git remote add origin https://github.com/USUARIO/REPO.git
+git push -u origin main
+
+
+--------------------------------------------------------------------------
+ 10. NAVEGAR / ARCHIVOS EN LA TERMINAL
+--------------------------------------------------------------------------
+ls  o  dir                   listar archivos
+cd carpeta / cd ..           entrar / salir
+mkdir nueva-carpeta          crear carpeta
+code .                       abrir la carpeta en VS Code
+cls  o  clear                limpiar la terminal
+(PS)   New-Item src\components\Boton.tsx      crear archivo
+(bash) touch src/components/Boton.tsx
+
+
+--------------------------------------------------------------------------
+ 11. BUILD (si piden generar APK)
+--------------------------------------------------------------------------
+npm install -g eas-cli
+eas login
+eas build:configure
+eas build -p android --profile preview     genera un APK descargable
+npx expo prebuild                          genera las carpetas android/ e ios/
+npx expo run:android                       compilar local (necesita Android Studio)
+
+
+--------------------------------------------------------------------------
+ 12. SNIPPETS RAPIDOS (para no olvidar la sintaxis)
+--------------------------------------------------------------------------
+Expo Router - archivos dentro de app/ (o src/app/):
+  app/_layout.tsx            layout raiz (<Stack />, <Tabs />, <Drawer />)
+  app/index.tsx              pantalla "/"
+  app/movie/[id].tsx         ruta dinamica -> const { id } = useLocalSearchParams();
+  app/(tabs)/_layout.tsx     grupo (no aparece en la URL)
+  router.push('/movie/1')    navegar          router.back()    volver
+  <Link href="/carrito">Ir</Link>
+
+Zustand:
+  import { create } from 'zustand';
+  const useCounter = create<{ count: number; inc: () => void }>()((set) => ({
+    count: 0,
+    inc: () => set((s) => ({ count: s.count + 1 })),
+  }));
+  const count = useCounter((s) => s.count);
+
+TanStack Query:
+  const { data, isLoading } = useQuery({
+    queryKey: ['movies', 'now-playing'],
+    queryFn: getNowPlaying,
+    staleTime: 1000 * 60 * 60,
+  });
+  (envolver la app en <QueryClientProvider client={queryClient}>)
+
+FlatList:
+  <FlatList
+    data={items}
+    keyExtractor={(i) => String(i.id)}
+    renderItem={({ item }) => <Text>{item.title}</Text>}
+    horizontal
+    onEndReached={loadMore}
+  />
+
+==========================================================================
